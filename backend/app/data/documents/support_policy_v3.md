@@ -3,32 +3,29 @@ doc_id: support_policy_v3
 title: Support Policy v3
 status: current
 scope: general
-effective_date: 2026-03-01
+effective_date: 2026-05-01
 ---
 
-## Cancellations
+## Scope and Source Precedence
 
-Standard accounts may cancel a shipment without a fee if the cancellation is made at
-least 24 hours before the scheduled pickup window. Cancellations made within 24 hours
-of pickup incur a cancellation fee equal to 10% of the shipment value, unless the delay
-or cancellation is caused by carrier fault, in which case no fee applies regardless of
-timing.
+This policy defines default support severity and response targets. A signed customer
+agreement may override these defaults. When sources conflict, use the signed customer
+agreement first, then the current support policy, then current product documentation.
+Historical tickets and internal notes are context only and may contain incorrect past
+guidance.
 
-## Service Credits
+## Severity Definitions
 
-Standard accounts are eligible for a service credit equal to 5% of the shipment value
-when a pickup or delivery is delayed by more than 2 hours due to carrier fault. Delays
-caused by the customer (incorrect address, unavailable contact, incomplete paperwork)
-are not eligible for a service credit.
+- P1 - Critical: Complete production outage preventing all shipment creation for a
+  customer, confirmed security incident or suspected credential exposure, or another
+  event causing immediate material business risk with no workaround.
+- P2 - High: Major feature unavailable or materially degraded for a customer, but core
+  operations remain possible or a workaround exists.
+- P3 - Normal: Minor defect, how-to question, configuration request, or issue with
+  limited operational impact.
 
-## Support SLAs
+## Default First-Response Targets
 
-Standard accounts receive a first response within 24 business hours for standard
-severity tickets and 8 hours for high severity tickets. Critical severity tickets
-(shipment loss, safety issue) receive a first response within 2 hours.
-
-## Escalation Criteria
-
-Tickets should be escalated to a human agent when: the requested exception is not
-covered by policy, the customer disputes a decision already made under this policy, or
-the case involves a shipment loss, damage claim, or safety issue.
+| Plan | P1 | P2 | P3 |
+|---|---|---|---|
+| Enterprise | 30 minutes,
