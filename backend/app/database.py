@@ -1,17 +1,22 @@
 import sqlite3
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime
 
 DB_PATH = Path(__file__).parent / "data" / "quitypilot.db"
-DATASET_SNAPSHOT = datetime(2026, 8, 20, 9, 0, 0)
+DATASET_SNAPSHOT = datetime(2026, 8, 16, 11, 0, 0)
+DATASET_SNAPSHOT_TZ = "Asia/Kolkata"
+CURRENCY = "INR"
 
 SCHEMA = """
 CREATE TABLE accounts (
     account_id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    tier TEXT NOT NULL,
-    agreement_doc_id TEXT,
-    created_at TEXT NOT NULL
+    account_name TEXT NOT NULL,
+    plan TEXT NOT NULL,
+    status TEXT NOT NULL,
+    csm TEXT,
+    contract_file TEXT,
+    premium_support INTEGER NOT NULL,
+    notes TEXT
 );
 
 CREATE TABLE orders (
@@ -19,29 +24,30 @@ CREATE TABLE orders (
     account_id TEXT NOT NULL,
     carrier TEXT NOT NULL,
     status TEXT NOT NULL,
-    shipment_value REAL NOT NULL,
-    pickup_scheduled_at TEXT NOT NULL,
+    booked_at TEXT NOT NULL,
+    pickup_window_start TEXT NOT NULL,
+    pickup_window_end TEXT NOT NULL,
     pickup_actual_at TEXT,
-    delivery_scheduled_at TEXT NOT NULL,
-    delivery_actual_at TEXT,
-    delay_reason TEXT,
-    created_at TEXT NOT NULL,
+    shipment_fee_inr REAL NOT NULL,
+    carrier_fault INTEGER NOT NULL,
+    customer_fault INTEGER NOT NULL,
+    cancellation_requested_at TEXT,
+    notes TEXT,
     FOREIGN KEY (account_id) REFERENCES accounts(account_id)
 );
 
 CREATE TABLE tickets (
     ticket_id TEXT PRIMARY KEY,
     account_id TEXT NOT NULL,
-    order_id TEXT,
-    category TEXT NOT NULL,
-    severity TEXT NOT NULL,
+    created_at TEXT NOT NULL,
     status TEXT NOT NULL,
     subject TEXT NOT NULL,
-    resolution_notes TEXT,
-    created_at TEXT NOT NULL,
-    resolved_at TEXT,
-    FOREIGN KEY (account_id) REFERENCES accounts(account_id),
-    FOREIGN KEY (order_id) REFERENCES orders(order_id)
+    description TEXT NOT NULL,
+    channel TEXT,
+    assigned_to TEXT,
+    last_customer_message_at TEXT,
+    historical_resolution TEXT,
+    FOREIGN KEY (account_id) REFERENCES accounts(account_id)
 );
 
 CREATE TABLE escalations (
@@ -58,78 +64,85 @@ CREATE TABLE escalations (
 """
 
 
-def iso(dt: datetime) -> str:
-    return dt.isoformat()
-
-
-def seed(conn: sqlite3.Connection) -> None:
-    accounts = [
-        ("ACC-NORTHSTAR", "Northstar Logistics", "enterprise", "northstar_agreement", iso(DATASET_SNAPSHOT - timedelta(days=400))),
-        ("ACC-LUMENWORKS", "LumenWorks", "enterprise", "lumenworks_agreement", iso(DATASET_SNAPSHOT - timedelta(days=300))),
-        ("ACC-BRIGHTFREIGHT", "Bright Freight Co", "standard", None, iso(DATASET_SNAPSHOT - timedelta(days=150))),
-        ("ACC-MERIDIAN", "Meridian Cargo", "standard", None, iso(DATASET_SNAPSHOT - timedelta(days=90))),
+def _accounts() -> list[tuple]:
+    return [
+        ("ACCT-001", "Northstar Logistics", "Enterprise", "active", "Priya Mehta",
+         "05_Northstar_Logistics_Enterprise_Agreement.pdf", 1,
+         "Strategic account. Contract contains custom SLA and cancellation terms."),
+        ("ACCT-002", "LumenWorks", "Growth", "active", "Arjun Rao",
+         "06_LumenWorks_Service_Agreement.pdf", 0,
+         "Growth customer with contract-specific service credit terms."),
+        ("ACCT-003", "Beacon Retail", "Standard", "active", "Neha Kapoor",
+         None, 0,
+         "No custom agreement in the supplied pack; standard policies apply."),
+        ("ACCT-004", "Axis Labs", "Enterprise", "active", "Priya Mehta",
+         None, 0,
+         "Enterprise plan; standard Enterprise support policy applies."),
     ]
-    conn.executemany(
-        "INSERT INTO accounts VALUES (?,?,?,?,?)", accounts
-    )
 
-    orders = [
-        ("ORD-1001", "ACC-NORTHSTAR", "SwiftHaul", "booked", 185000, iso(DATASET_SNAPSHOT + timedelta(hours=4)), None, iso(DATASET_SNAPSHOT + timedelta(hours=30)), None, None, iso(DATASET_SNAPSHOT - timedelta(hours=20))),
-        ("ORD-1002", "ACC-NORTHSTAR", "RapidLane", "delivered", 92000, iso(DATASET_SNAPSHOT - timedelta(days=3)), iso(DATASET_SNAPSHOT - timedelta(days=3, hours=-3)), iso(DATASET_SNAPSHOT - timedelta(days=2)), iso(DATASET_SNAPSHOT - timedelta(days=1, hours=20)), "carrier_fault", iso(DATASET_SNAPSHOT - timedelta(days=5))),
-        ("ORD-1003", "ACC-NORTHSTAR", "CargoNorth", "in_transit", 41000, iso(DATASET_SNAPSHOT - timedelta(days=1)), iso(DATASET_SNAPSHOT - timedelta(days=1)), iso(DATASET_SNAPSHOT + timedelta(hours=10)), None, None, iso(DATASET_SNAPSHOT - timedelta(days=2))),
-        ("ORD-1004", "ACC-LUMENWORKS", "SwiftHaul", "delivered", 67000, iso(DATASET_SNAPSHOT - timedelta(days=6)), iso(DATASET_SNAPSHOT - timedelta(days=6, hours=-5)), iso(DATASET_SNAPSHOT - timedelta(days=5)), iso(DATASET_SNAPSHOT - timedelta(days=4, hours=18)), "carrier_fault", iso(DATASET_SNAPSHOT - timedelta(days=8))),
-        ("ORD-1005", "ACC-LUMENWORKS", "BlueArc", "booked", 53000, iso(DATASET_SNAPSHOT + timedelta(hours=20)), None, iso(DATASET_SNAPSHOT + timedelta(hours=44)), None, None, iso(DATASET_SNAPSHOT - timedelta(hours=6))),
-        ("ORD-1006", "ACC-LUMENWORKS", "RapidLane", "cancelled", 28000, iso(DATASET_SNAPSHOT - timedelta(days=2)), None, iso(DATASET_SNAPSHOT - timedelta(days=1)), None, "shipper_requested", iso(DATASET_SNAPSHOT - timedelta(days=4))),
-        ("ORD-1007", "ACC-BRIGHTFREIGHT", "SwiftHaul", "in_transit", 15000, iso(DATASET_SNAPSHOT - timedelta(days=1)), iso(DATASET_SNAPSHOT - timedelta(days=1)), iso(DATASET_SNAPSHOT + timedelta(hours=8)), None, "tracking_sync_delay", iso(DATASET_SNAPSHOT - timedelta(days=3))),
-        ("ORD-1008", "ACC-BRIGHTFREIGHT", "CargoNorth", "booked", 9800, iso(DATASET_SNAPSHOT + timedelta(hours=2)), None, iso(DATASET_SNAPSHOT + timedelta(hours=26)), None, None, iso(DATASET_SNAPSHOT - timedelta(hours=10))),
-        ("ORD-1009", "ACC-MERIDIAN", "BlueArc", "delivered", 34000, iso(DATASET_SNAPSHOT - timedelta(days=10)), iso(DATASET_SNAPSHOT - timedelta(days=10)), iso(DATASET_SNAPSHOT - timedelta(days=9)), iso(DATASET_SNAPSHOT - timedelta(days=8, hours=22)), "address_validation_error", iso(DATASET_SNAPSHOT - timedelta(days=12))),
-        ("ORD-1010", "ACC-MERIDIAN", "SwiftHaul", "booked", 21000, iso(DATASET_SNAPSHOT + timedelta(hours=1)), None, iso(DATASET_SNAPSHOT + timedelta(hours=25)), None, None, iso(DATASET_SNAPSHOT - timedelta(hours=2))),
-    ]
-    conn.executemany(
-        "INSERT INTO orders VALUES (?,?,?,?,?,?,?,?,?,?,?)", orders
-    )
 
-    tickets = [
-        ("TCK-2001", "ACC-NORTHSTAR", "ORD-1002", "service_credit", "high", "resolved",
-         "Delivery delayed 5 hours, carrier fault",
-         "Approved credit at 5% standard rate per policy v2.",
-         iso(DATASET_SNAPSHOT - timedelta(days=4, hours=20)), iso(DATASET_SNAPSHOT - timedelta(days=4, hours=10))),
-        ("TCK-2002", "ACC-NORTHSTAR", "ORD-1003", "tracking", "standard", "open",
-         "No tracking updates for 6 hours",
-         None, iso(DATASET_SNAPSHOT - timedelta(hours=5)), None),
-        ("TCK-2003", "ACC-LUMENWORKS", "ORD-1004", "service_credit", "standard", "resolved",
-         "Requesting credit for late delivery",
-         "Approved credit at 3% per LumenWorks agreement rate.",
-         iso(DATASET_SNAPSHOT - timedelta(days=4, hours=15)), iso(DATASET_SNAPSHOT - timedelta(days=4, hours=2))),
-        ("TCK-2004", "ACC-LUMENWORKS", "ORD-1006", "cancellation", "standard", "resolved",
-         "Cancelled shipment, asking about fee",
-         "Waived fee as goodwill gesture, no policy basis recorded.",
-         iso(DATASET_SNAPSHOT - timedelta(days=4)), iso(DATASET_SNAPSHOT - timedelta(days=3, hours=20))),
-        ("TCK-2005", "ACC-BRIGHTFREIGHT", "ORD-1007", "tracking", "standard", "open",
-         "Shipment stuck at in-transit with no updates",
-         None, iso(DATASET_SNAPSHOT - timedelta(hours=18)), None),
-        ("TCK-2006", "ACC-BRIGHTFREIGHT", "ORD-1007", "tracking", "standard", "open",
-         "Same shipment still shows no movement",
-         None, iso(DATASET_SNAPSHOT - timedelta(hours=6)), None),
-        ("TCK-2007", "ACC-MERIDIAN", "ORD-1009", "service_credit", "high", "open",
-         "Address validation caused late pickup, requesting credit",
-         None, iso(DATASET_SNAPSHOT - timedelta(hours=30)), None),
-        ("TCK-2008", "ACC-MERIDIAN", None, "billing", "standard", "open",
-         "Duplicate invoice line on monthly statement",
-         None, iso(DATASET_SNAPSHOT - timedelta(hours=12)), None),
-        ("TCK-2009", "ACC-NORTHSTAR", None, "billing", "standard", "open",
-         "Duplicate invoice line on monthly statement",
-         None, iso(DATASET_SNAPSHOT - timedelta(hours=9)), None),
-        ("TCK-2010", "ACC-LUMENWORKS", None, "billing", "standard", "open",
-         "Two charges for same shipment this month",
-         None, iso(DATASET_SNAPSHOT - timedelta(hours=3)), None),
-        ("TCK-2011", "ACC-BRIGHTFREIGHT", "ORD-1008", "cancellation", "critical", "open",
-         "Need to cancel booked shipment urgently, damage risk flagged",
-         None, iso(DATASET_SNAPSHOT - timedelta(hours=1)), None),
+def _orders() -> list[tuple]:
+    return [
+        ("ORD-1001", "ACCT-001", "SwiftShip", "BOOKED",
+         "2026-08-16 09:00", "2026-08-16 10:30", "2026-08-16 11:30", None,
+         4200.0, 0, 0, "2026-08-16 11:00",
+         "Customer asks to cancel. Shipment has not been picked up."),
+        ("ORD-1002", "ACCT-001", "BlueDart Pro", "PICKED_UP",
+         "2026-08-16 08:10", "2026-08-16 09:00", "2026-08-16 10:00", "2026-08-16 09:35",
+         5100.0, 0, 0, "2026-08-16 10:20",
+         "Customer later asked to cancel after pickup."),
+        ("ORD-2001", "ACCT-002", "SwiftShip", "BOOKED",
+         "2026-08-16 09:00", "2026-08-16 11:00", "2026-08-16 12:00", None,
+         1800.0, 0, 0, "2026-08-16 10:15",
+         "Cancellation requested 75 minutes after booking; not yet picked up."),
+        ("ORD-2002", "ACCT-002", "RoadRunner", "BOOKED",
+         "2026-08-16 04:30", "2026-08-16 05:30", "2026-08-16 06:30", None,
+         2400.0, 1, 0, None,
+         "Pickup missed. Carrier accepted fault. Still not picked up at dataset snapshot."),
+        ("ORD-3001", "ACCT-003", "RoadRunner", "BOOKED",
+         "2026-08-16 10:25", "2026-08-16 12:00", "2026-08-16 13:00", None,
+         1200.0, 0, 0, "2026-08-16 10:40",
+         "Cancellation requested within 30 minutes of booking."),
+        ("ORD-4001", "ACCT-004", "SwiftShip", "DELIVERED",
+         "2026-08-14 14:00", "2026-08-15 09:00", "2026-08-15 10:00", "2026-08-15 09:20",
+         3600.0, 0, 0, None,
+         "Completed delivery."),
     ]
-    conn.executemany(
-        "INSERT INTO tickets VALUES (?,?,?,?,?,?,?,?,?,?)", tickets
-    )
+
+
+def _tickets() -> list[tuple]:
+    return [
+        ("TKT-501", "ACCT-001", "2026-08-16 10:30", "open",
+         "All shipment creation is failing",
+         "Every user at Northstar gets HTTP 500 when creating any shipment. Existing shipments can still be viewed.",
+         "email", "Rohit", "2026-08-16 10:52", None),
+        ("TKT-502", "ACCT-002", "2026-08-16 09:45", "open",
+         "Bulk upload fails for 4,200-row CSV",
+         "The CSV reaches roughly 70% and fails. Creating shipments one-by-one still works.",
+         "chat", "Maya", "2026-08-16 10:40", None),
+        ("TKT-503", "ACCT-003", "2026-08-16 10:05", "open",
+         "How do we change the billing contact?",
+         "Customer wants to replace the billing-contact email on their account.",
+         "email", "Rohit", "2026-08-16 10:05", None),
+        ("TKT-504", "ACCT-001", "2026-08-16 10:50", "open",
+         "SwiftShip order still shows BOOKED after driver pickup",
+         "Driver collected the parcel around 10 minutes ago, but ParcelPilot still shows BOOKED.",
+         "chat", "Maya", "2026-08-16 10:58", None),
+        ("TKT-505", "ACCT-004", "2026-08-16 08:30", "open",
+         "Possible API key exposure",
+         "An employee accidentally posted a screenshot containing a production API key in a public channel. They are asking what to do.",
+         "email", "Rohit", "2026-08-16 09:10", None),
+        ("TKT-450", "ACCT-001", "2026-07-12 14:10", "closed",
+         "Cancellation fee after 30 minutes",
+         "Northstar asked whether a BOOKED shipment could be cancelled 90 minutes after booking before pickup.",
+         "email", "Maya", "2026-07-12 15:00",
+         "Agent told customer a INR 250 cancellation fee applied after 30 minutes."),
+        ("TKT-451", "ACCT-002", "2026-08-11 11:20", "closed",
+         "Bulk upload fails for large CSV",
+         "LumenWorks reported failures when uploading 3,500-row CSV files.",
+         "chat", "Rohit", "2026-08-11 12:10",
+         "Agent told customer Growth plan only supports 3,000 rows."),
+    ]
 
 
 def init_db() -> None:
@@ -138,7 +151,9 @@ def init_db() -> None:
         DB_PATH.unlink()
     conn = sqlite3.connect(DB_PATH)
     conn.executescript(SCHEMA)
-    seed(conn)
+    conn.executemany("INSERT INTO accounts VALUES (?,?,?,?,?,?,?,?)", _accounts())
+    conn.executemany("INSERT INTO orders VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", _orders())
+    conn.executemany("INSERT INTO tickets VALUES (?,?,?,?,?,?,?,?,?,?)", _tickets())
     conn.commit()
     conn.close()
 
@@ -147,3 +162,4 @@ def get_conn() -> sqlite3.Connection:
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
