@@ -1,40 +1,36 @@
 ---
-doc_id: cancellation_sop_v4
+doc_id: cancellation_service_credit_sop_v4
 title: Cancellation and Service Credit SOP v4
 status: current
 scope: general
-effective_date: 2026-04-15
+effective_date: 2026-06-15
 ---
 
-## Determining Carrier Fault
+## Order Cancellation
 
-Carrier fault applies when the delay or cancellation originates from the carrier
-partner: vehicle breakdown, missed pickup window, routing error, or capacity failure
-reported by the carrier. It does not apply when the delay originates from the shipper
-(address errors, missing documentation, unavailable goods) or from force majeure
-events (weather closures, customs holds outside carrier control).
+- DRAFT: May be cancelled with no fee.
+- BOOKED, not yet PICKED_UP: May be cancelled. No fee within 30 minutes of booking.
+  After 30 minutes, charge INR 250 unless a customer agreement explicitly waives the
+  cancellation fee.
+- PICKED_UP: Do not cancel. Use the return-to-origin workflow if the customer wants
+  the parcel returned.
+- DELIVERED: Cannot be cancelled.
 
-## Calculating Cancellation Fee Waivers
+## Failed-Pickup Service Credits
 
-1. Check the account's agreement for a custom cancellation window. If none exists, use
-   the 24-hour window from Support Policy v3.
-2. If the cancellation falls within the fee window, check whether carrier fault
-   applies. If carrier fault applies, waive the fee regardless of timing.
-3. If no carrier fault and no agreement override, apply the 10% fee from Support
-   Policy v3.
+Under the default policy, a customer is eligible for a service credit when the pickup
+is more than 2 hours past the end of the scheduled pickup window, the carrier is at
+fault, and there is no customer-caused issue. The default credit is the lower of
+INR 500 or 10% of the shipment fee.
 
-## Calculating Service Credit Amount
+A signed customer agreement may replace the default delay threshold, credit amount, or
+cap.
 
-1. Confirm the delay exceeds 2 hours and is due to carrier fault.
-2. Use the account's agreement rate if one is specified; otherwise use the 5%
-   standard rate from Support Policy v3.
-3. Service credits are applied to the account balance and require no further
-   approval below ₹25,000. Credits above ₹25,000 require escalation for manager
-   approval before being issued.
+## Approval and Uncertainty
 
-## When to Escalate Instead of Resolving Directly
-
-Escalate rather than resolve directly when: fault is genuinely ambiguous between
-shipper and carrier, the shipment appears in the Known Issues list with an unresolved
-root cause, the requested credit exceeds ₹25,000, or the customer's agreement terms
-are unclear on the scenario presented.
+- Any individual credit above INR 1,000 requires manager approval.
+- Do not promise a credit when carrier fault, pickup timing, or customer fault is
+  unknown.
+- When data conflicts, identify the conflict and request verification before a
+  state-changing action.
+  
