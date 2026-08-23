@@ -5,7 +5,7 @@ from fastapi import Header, HTTPException
 SECRET = "quitypilot-demo-secret-do-not-use-in-production"
 serializer = URLSafeSerializer(SECRET, salt="session")
 
-VALID_ACCOUNTS = {"ACC-NORTHSTAR", "ACC-LUMENWORKS", "ACC-BRIGHTFREIGHT", "ACC-MERIDIAN"}
+VALID_ACCOUNTS = {"ACCT-001", "ACCT-002", "ACCT-003", "ACCT-004"}
 VALID_ROLES = {"customer", "support_agent", "ops_manager"}
 
 
