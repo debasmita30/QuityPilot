@@ -101,7 +101,7 @@ export function Login({ onLogin }: { onLogin: (session: Session) => void }) {
                 >
                   {accounts.map((a) => (
                     <option key={a.account_id} value={a.account_id}>
-                      {a.name} · {a.tier}
+                      {a.account_name} · {a.plan}
                     </option>
                   ))}
                 </select>
