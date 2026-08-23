@@ -1,33 +1,50 @@
 # Note on data
 
-This submission was built before the real ParcelPilot candidate data pack (the six
-PDFs and `ParcelPilot_Assessment_Data.xlsx`) was available in this environment, so it
-ships with an equivalent hand-built mock pack that mirrors the real one's structure and
-deliberately reproduces the same traps described in the assessment brief:
+This submission uses the real ParcelPilot candidate data pack:
 
-- `support_policy_v3.md` — current general policy
-- `support_policy_v2_deprecated.md` — deprecated, must never be cited as current
-- `cancellation_service_credit_sop_v4.md` — procedural rules and escalation criteria
-- `product_ops_known_issues.md` — known issues, some of which affect fault
-  determination for service credits
-- `northstar_enterprise_agreement.md` — overrides cancellation window, credit rate,
-  SLA, and approval threshold for Northstar
-- `lumenworks_service_agreement.md` — overrides only the credit rate for LumenWorks,
-  explicitly confirms no override on cancellation/SLA (a "quiet" agreement, to test
-  that the system doesn't invent overrides that aren't there)
+- `01_Support_Policy_v3_CURRENT.pdf`
+- `02_Support_Policy_v2_DEPRECATED.pdf`
+- `03_Cancellation_and_Service_Credit_SOP_v4.pdf`
+- `04_Product_Operations_Guide_and_Known_Issues.pdf`
+- `05_Northstar_Logistics_Enterprise_Agreement.pdf`
+- `06_LumenWorks_Service_Agreement.pdf`
+- `ParcelPilot_Assessment_Data.xlsx`
 
-Structured data (`database.py`) seeds four accounts, ten orders, and eleven tickets
-designed to exercise: an SLA breach under an account-specific SLA override, a same-order
-recurring ticket pair, a cross-account known-issue cluster (duplicate invoicing hitting
-three different accounts within hours of each other), and at least one ticket whose
-`resolution_notes` field cites the deprecated policy's numbers — to verify the agent
-doesn't repeat it as current guidance.
+The six PDFs are transcribed into `backend/app/data/documents/*.md` with YAML
+frontmatter (`doc_id`, `status`, `scope`, `effective_date`) that `retrieval.py` uses
+for source-precedence filtering. The workbook's `accounts`, `orders`, and `tickets`
+sheets are seeded directly into SQLite in `backend/app/database.py`, using the
+workbook's stated dataset snapshot time (2026-08-16 11:00 Asia/Kolkata) as
+`DATASET_SNAPSHOT` — the fixed "now" every date/time comparison in the system is
+anchored to, per the README sheet's instruction to use it as the reference time for
+all time-based questions.
 
-**To use the real data pack:** replace the files in `backend/app/data/documents/` with
-the real policy/agreement documents (keep the YAML frontmatter convention — `doc_id`,
-`title`, `status`, `scope`, `effective_date` — since `retrieval.py` depends on it for
-precedence filtering), and replace the seed data in `database.py` with a loader over
-the real `ParcelPilot_Assessment_Data.xlsx` (a `pandas.read_excel` → `INSERT` pass is
-a small, contained change; the SQL schema should map closely to the workbook's
-account/order/ticket sheets). Update `DATASET_SNAPSHOT` in `database.py` to the
-reference time stated in the workbook's README sheet.
+## Deliberate traps in this dataset, and how the system is meant to handle them
+
+- **Northstar's cancellation override is unconditional**, not time-windowed: any
+  BOOKED shipment can be cancelled fee-free regardless of how long ago it was booked,
+  which is a stronger override than the SOP's default 30-minute grace period. ORD-1001
+  (Northstar, BOOKED, not picked up) tests whether the agent applies the agreement
+  correctly instead of defaulting to the SOP's INR 250 fee.
+- **`TKT-450`'s historical resolution is wrong for a checkable reason**: it applied
+  the SOP's default INR 250 cancellation fee to a Northstar ticket, but Northstar's
+  agreement waives that fee entirely — the past agent apparently didn't check the
+  account-specific override. The system should flag this rather than repeat it.
+- **`TKT-451`'s historical resolution is also wrong**: it told a customer the Growth
+  plan supports only 3,000-row CSVs, but the Product Operations Guide states the
+  actual supported limit is 5,000 rows (3,000 is only where intermittent *failures*
+  become more likely under known issue KI-208, not the documented limit).
+- **Ticket severity is not a stored field.** The workbook's `tickets` sheet has no
+  severity column — `signals.py: classify_severity()` and the agent's system prompt
+  both derive P1/P2/P3 from the ticket's subject/description against Support Policy
+  v3's definitions, matching how a human agent would actually triage.
+- **KI-211 (SwiftShip webhook delay) can explain a symptom without it being a new
+  incident** — `TKT-504`'s "still shows BOOKED after pickup" was raised only ~10
+  minutes after pickup, within the known delay window, so it shouldn't be treated as
+  a fresh incident requiring escalation.
+- **LumenWorks' agreement mostly restates rather than overrides** — its SLA targets
+  happen to equal the Growth plan defaults, and its failed-pickup credit clause
+  replaces the SOP's default threshold and amount with a fixed INR 300 / 4-hour rule.
+  This tests whether the system still checks the agreement first even when the
+  numbers turn out to match the default, rather than skipping the check because "it's
+  probably the same as the default anyway."
