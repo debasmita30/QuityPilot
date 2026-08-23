@@ -2,29 +2,33 @@
 doc_id: northstar_agreement
 title: Northstar Logistics Enterprise Agreement
 status: current
-scope: account:northstar
-effective_date: 2026-01-15
+scope: account:ACCT-001
+effective_date: 2026-01-01
+account_id: ACCT-001
+account_name: Northstar Logistics
+term_end: 2026-12-31
 ---
 
-## Cancellation Terms
+## Support Terms
 
-Northstar Logistics may cancel any shipment without a cancellation fee up to 6 hours
-before the scheduled pickup window, in place of the standard 24-hour window. Within 6
-hours of pickup, the standard 10% fee applies unless carrier fault is established, in
-which case the fee is waived as under standard policy.
+For Northstar Logistics, the following first-response targets replace ParcelPilot's
+standard support-policy targets:
 
-## Service Credit Terms
+- P1: 15 minutes, 24x7
+- P2: 1 hour
+- P3: 8 business hours
 
-Northstar Logistics receives a service credit rate of 8% of shipment value (in place
-of the standard 5%) for carrier-fault delays exceeding 2 hours.
+## Shipment Cancellation
 
-## Support SLA Terms
+Northstar may cancel any BOOKED shipment before pickup with no cancellation fee,
+regardless of how long ago the shipment was booked. Once a shipment is PICKED_UP, the
+standard return-to-origin process applies.
 
-Northstar Logistics receives a first response within 4 business hours for all ticket
-severities, in place of standard SLA tiers.
+## Service Credits
 
-## Approval Authority
+Monthly aggregate service credits are capped at INR 5,000. Unless this agreement
+states otherwise, the current ParcelPilot service-credit SOP applies.
 
-Northstar's account manager may approve service credits up to ₹75,000 without further
-escalation, in place of the standard ₹25,000 threshold in the Cancellation and Service
-Credit SOP.
+## Account Contact
+
+Dedicated CSM: Priya Mehta.
