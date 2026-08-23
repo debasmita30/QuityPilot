@@ -12,8 +12,8 @@ export interface Session {
 
 export interface Account {
   account_id: string;
-  name: string;
-  tier: string;
+  account_name: string;
+  plan: string;
 }
 
 export interface ToolTraceEntry {
@@ -97,9 +97,9 @@ export interface SlaSignal {
   level: "at_risk" | "breached";
   ticket_id: string;
   account_id: string;
-  severity: string;
-  elapsed_hours: number;
-  target_hours: number;
+  classified_severity: string;
+  elapsed_minutes: number;
+  target_minutes: number;
   subject: string;
 }
 
