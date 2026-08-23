@@ -9,7 +9,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 @router.get("/accounts")
 def list_accounts():
     conn = get_conn()
-    rows = conn.execute("SELECT account_id, name, tier FROM accounts").fetchall()
+    rows = conn.execute("SELECT account_id, account_name, plan FROM accounts").fetchall()
     conn.close()
     return {"accounts": [dict(r) for r in rows]}
 
