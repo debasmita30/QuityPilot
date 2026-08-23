@@ -67,13 +67,15 @@ The assessment allows either a customer-facing or an internal support/ops chatbo
 
 ### Manifest-scoped sign-in — Internal Ops vs. Customer
 
-<img src="./assets/login-internal.webp" width="80%" alt="Internal Ops login — name and role selection"/>
+<img width="1568" height="712" alt="login-internal" src="https://github.com/user-attachments/assets/1e34d0d4-c760-4190-b7b4-86cd5d934de2" />
+
 
 *Internal roles select a role (e.g. Ops Manager) and get cross-account tools plus the Signals dashboard.*
 
 <br/>
 
-<img src="./assets/login-customer.webp" width="80%" alt="Customer login — name and account selection"/>
+<img width="1568" height="704" alt="login-customer" src="https://github.com/user-attachments/assets/8a5b90fc-da3e-4f25-ab6b-e21b9515b864" />
+
 
 *Customer sessions are scoped to a single seeded account at the data layer.*
 
@@ -81,7 +83,8 @@ The assessment allows either a customer-facing or an internal support/ops chatbo
 
 ### Precedence-aware reasoning, as an Ops Manager
 
-<img src="./assets/chat-internal-precedence.webp" width="80%" alt="Ops manager chat showing agreement overriding default SOP"/>
+<img width="1568" height="707" alt="chat-internal-precedence" src="https://github.com/user-attachments/assets/fb85175a-fcdd-4bd6-94c5-a65e5d0927b6" />
+
 
 *Asked whether Northstar can cancel `ORD-1001` without a fee, the agent pulls the order, checks the default Cancellation SOP (₹250 after 30 minutes), then finds the Northstar Enterprise Agreement waives the fee unconditionally — and explains why the agreement wins.*
 
@@ -89,7 +92,8 @@ The assessment allows either a customer-facing or an internal support/ops chatbo
 
 ### The same question, scoped to a customer session
 
-<img src="./assets/chat-customer-scoped.webp" width="80%" alt="Customer session correctly denied access to another account's order"/>
+<img width="1568" height="708" alt="chat-customer-scoped" src="https://github.com/user-attachments/assets/42ebc568-3ec0-4217-afd5-82fa092724b7" />
+
 
 *The identical question asked from a customer session for a different account: the order lookup is denied (`access_denied`) at the tool layer before the model ever sees that account's data — the agent still reasons over the policy text it's allowed to see, but is upfront that it can't confirm the order's current status.*
 
