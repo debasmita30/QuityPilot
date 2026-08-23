@@ -6,6 +6,8 @@
 
 *Built for the CalQuity AI Engineer Assessment*
 
+<a href="https://quity-pilot.vercel.app/" target="_blank"> <img src="https://img.shields.io/badge/🚀%20LIVE%20DEMO-quity--pilot.vercel.app-4FE0B0?style=for-the-badge&logoColor=white" alt="Live Demo"/> </a>
+
 ![FastAPI](https://img.shields.io/badge/FastAPI-Python-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-Database-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
 ![scikit--learn](https://img.shields.io/badge/scikit--learn-TF--IDF%20Retrieval-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white)
@@ -15,6 +17,8 @@
 ![LLM](https://img.shields.io/badge/LLM-Claude%20%7C%20Groq%20(Llama%203.3%2070B)-B69CFF?style=for-the-badge)
 ![Access Control](https://img.shields.io/badge/Access-Account%20%2F%20Role%20Scoped-FF7A3C?style=for-the-badge)
 ![Human in the Loop](https://img.shields.io/badge/Escalations-Human%20Confirmed-4FE0B0?style=for-the-badge)
+
+
 
 </div>
 
