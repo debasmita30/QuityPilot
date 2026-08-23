@@ -1,38 +1,35 @@
 ---
 doc_id: product_ops_guide
-title: Product Operations Guide and Known Issues
+title: Product Operations Guide
 status: current
 scope: general
-effective_date: 2026-07-20
+effective_date: 2026-08-14
 ---
 
-## Known Issue: Carrier Sync Delay (SwiftHaul)
+## Plan Capabilities
 
-Tracking updates from carrier partner SwiftHaul have been delayed by up to 6 hours
-since 2026-07-05 due to an integration issue on SwiftHaul's side. Shipments show as
-"in transit" without status updates during this window even though carrier operations
-are proceeding normally. This is not carrier fault for service-credit purposes unless
-the underlying pickup or delivery itself was late, not just the tracking display.
-Root cause: unresolved, SwiftHaul engineering engaged.
+- Bulk Upload: Available on Growth and Enterprise. Supported file size is up to 5,000
+  rows per CSV.
+- Standard: Bulk Upload is not included.
+- Shipment status: BOOKED means the shipment is created but ParcelPilot has not yet
+  received a pickup confirmation. PICKED_UP means carrier pickup has been confirmed.
 
-## Known Issue: Duplicate Invoice Generation
+## Current Known Issues
 
-Enterprise accounts on consolidated monthly billing may see a duplicate invoice line
-for shipments booked in the last week of July 2026 due to a billing cycle overlap bug.
-Support should note this on any related ticket rather than treating it as a new
-billing dispute. Root cause: identified, fix scheduled, do not action a refund without
-escalation.
+### KI-208 - Bulk Upload failures on large CSVs
 
-## Known Issue: Address Validation False Positives
+Opened: 10 August 2026. Status: Investigating.
 
-The address validation step has occasionally rejected valid addresses in Tier 2 cities
-since 2026-06-01, requiring manual override by support. This can delay pickup
-scheduling and, if it causes a late pickup, does count as a ParcelPilot-side fault for
-service-credit purposes. Root cause: identified, fix in progress.
+Some Growth and Enterprise customers experience intermittent failures on CSV uploads
+above approximately 3,000 rows, even though the supported product limit remains 5,000
+rows. Workaround: split the upload into files below 3,000 rows. Individual shipment
+creation is unaffected.
 
-## General Operational Notes
+### KI-211 - SwiftShip pickup webhook delay
 
-Carrier partners currently integrated: SwiftHaul, RapidLane, CargoNorth, BlueArc.
-Standard pickup windows are booked in 2-hour blocks. Shipment value is used as the
-basis for all fee and credit percentage calculations referenced in policy and SOP
-documents.
+Opened: 12 August 2026. Status: Monitoring.
+
+SwiftShip pickup confirmation webhooks can arrive up to 20 minutes late. A parcel may
+physically be collected while ParcelPilot still shows BOOKED. Before telling a
+customer that a pickup did not occur, verify the carrier status or wait through the
+known delay window.
