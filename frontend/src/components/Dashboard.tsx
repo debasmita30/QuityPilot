@@ -54,7 +54,7 @@ export function Dashboard({ session }: { session: Session }) {
                 <div className="font-mono text-xs text-paper">{s.ticket_id} · {s.account_id}</div>
                 <div className="text-sm text-muted">{s.subject}</div>
                 <div className="text-xs text-muted mt-1">
-                  {s.elapsed_hours}h elapsed / {s.target_hours}h target · {s.severity}
+                  {s.elapsed_minutes}m elapsed / {s.target_minutes}m target · {s.classified_severity}
                 </div>
               </div>
               <LevelBadge level={s.level} />
