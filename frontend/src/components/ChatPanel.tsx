@@ -13,9 +13,9 @@ interface Turn {
 
 const SUGGESTIONS = [
   "Can Northstar cancel ORD-1001 without a cancellation fee? Explain why.",
-  "A pickup is three hours late because of carrier fault. Should I get a service credit?",
-  "What's the SLA status on TCK-2007?",
-  "Are there any known issues affecting SwiftHaul right now?",
+  "Should LumenWorks get a service credit for ORD-2002?",
+  "What severity is TKT-501 and is it within its response target?",
+  "Does KI-211 explain why TKT-504's order still shows BOOKED?",
 ];
 
 export function ChatPanel({ session }: { session: Session }) {
