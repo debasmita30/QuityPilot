@@ -3,24 +3,20 @@ doc_id: support_policy_v2
 title: Support Policy v2
 status: deprecated
 scope: general
-effective_date: 2025-01-10
+effective_date: 2025-01-01
 superseded_by: support_policy_v3
 ---
 
-## Cancellations
+## Severity and Response Targets
 
-Accounts may cancel a shipment without a fee if the cancellation is made at least 48
-hours before the scheduled pickup window. Cancellations made within 48 hours incur a
-flat cancellation fee of ₹2,000 regardless of cause.
+P1 covers complete production outages and severe security incidents. P2 covers major
+feature degradation. P3 covers minor issues and questions.
 
-## Service Credits
+| Plan | P1 | P2 | P3 |
+|---|---|---|---|
+| Enterprise | 1 hour | 4 hours | 2 business days |
+| Growth | 4 business hours | 1 business day | 3 business days |
+| Standard | 8 business hours | 2 business days | 3 business days |
 
-Accounts are eligible for a service credit equal to 3% of the shipment value when a
-pickup or delivery is delayed by more than 4 hours, regardless of cause.
-
-## Support SLAs
-
-All tickets receive a first response within 48 business hours.
-
-This document is retained for historical reference only and no longer reflects
-ParcelPilot policy. Do not apply these terms to current requests.
+This file is intentionally retained for historical reference and must not be used as
+current policy. It was superseded by Support Policy v3, effective 1 May 2026.
