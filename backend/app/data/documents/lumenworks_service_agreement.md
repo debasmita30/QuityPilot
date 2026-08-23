@@ -2,22 +2,29 @@
 doc_id: lumenworks_agreement
 title: LumenWorks Service Agreement
 status: current
-scope: account:lumenworks
-effective_date: 2026-02-01
+scope: account:ACCT-002
+effective_date: 2026-03-01
+account_id: ACCT-002
+account_name: LumenWorks
+plan: Growth
+term_end: 2027-02-28
 ---
+
+## Support Terms
+
+- P1: 2 business hours
+- P2: 4 business hours
+- P3: 2 business days
+- No weekend or after-hours support coverage.
 
 ## Cancellation Terms
 
-LumenWorks follows the standard 24-hour cancellation window and 10% fee as defined in
-Support Policy v3. No custom override applies.
+No special cancellation-fee waiver applies. Use the current ParcelPilot Cancellation
+and Service Credit SOP.
 
-## Service Credit Terms
+## Failed-Pickup Credits
 
-LumenWorks receives a discounted service credit rate of 3% of shipment value (in place
-of the standard 5%) for carrier-fault delays exceeding 2 hours, reflecting LumenWorks'
-volume-discount pricing tier.
-
-## Support SLA Terms
-
-LumenWorks follows standard SLA tiers as defined in Support Policy v3. No custom
-override applies.
+If a pickup is more than 4 hours past the end of the scheduled pickup window, the
+carrier is at fault, and the customer is not at fault, LumenWorks receives a fixed
+INR 300 service credit. This clause replaces the default failed-pickup credit amount
+and timing threshold in the SOP.
