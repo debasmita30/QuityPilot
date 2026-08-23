@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --color-ink: #f4f0e6;
+  --color-panel: rgba(255, 255, 255, 0.5);
+  --color-panel-raised: rgba(255, 255, 255, 0.72);
+  --color-line: rgba(58, 56, 43, 0.14);
+  --color-paper: #302e26;
+  --color-muted: #837d68;
+  --color-signal: #6e7b4e;
+  --color-signal-soft: rgba(110, 123, 78, 0.14);
+  --color-ok: #4f7a5c;
+  --color-warn: #b0862c;
+  --color-breach: #ad4d3c;
+  --color-route: #3e6b6b;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 12% -10%, rgba(110, 123, 78, 0.14), transparent 55%),
+    radial-gradient(900px 500px at 105% 10%, rgba(62, 107, 107, 0.10), transparent 55%),
+    linear-gradient(180deg, #f7f3e9 0%, #efe9db 100%);
+  color: var(--color-paper);
+  font-family: var(--font-body);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: var(--color-signal-soft);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+.glass {
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+}
+
+.manifest-edge {
+  background-image: radial-gradient(circle, #efe9db 2.5px, transparent 2.5px);
+  background-size: 10px 10px;
+  background-position: -5px 0;
+  height: 5px;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.pulse-dot {
+  animation: pulse-dot 1.6s ease-in-out infinite;
+}
+

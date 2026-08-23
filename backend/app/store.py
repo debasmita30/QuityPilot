@@ -1,0 +1,1 @@
+CONVERSATIONS: dict[str, list] = {}
