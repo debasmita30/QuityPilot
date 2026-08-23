@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from fastapi import HTTPException
 from .auth import SessionContext, VALID_ACCOUNTS
-from .database import get_conn, DATASET_SNAPSHOT
+from .database import get_conn, DATASET_SNAPSHOT, CURRENCY
 from .retrieval import get_index
 
 PENDING_ACTIONS: dict[str, dict] = {}
@@ -19,7 +19,7 @@ def _resolve_account_scope(session: SessionContext, requested_account_id: str | 
 
 
 def search_documents(session: SessionContext, query: str, include_deprecated: bool = False) -> dict:
-    account_scope = session.account_id.replace("ACC-", "").lower() if session.account_id else None
+    account_scope = session.account_id if session.account_id else None
     index = get_index()
     results = index.search(query, account_scope=account_scope, include_deprecated=include_deprecated)
     return {"results": results}
@@ -35,9 +35,19 @@ def get_order(session: SessionContext, order_id: str) -> dict:
     if session.persona == "customer" and order["account_id"] != session.account_id:
         return {"error": "access_denied"}
     now = DATASET_SNAPSHOT
-    pickup = datetime.fromisoformat(order["pickup_scheduled_at"])
-    order["hours_until_pickup"] = round((pickup - now).total_seconds() / 3600, 2)
+    order["carrier_fault"] = bool(order["carrier_fault"])
+    order["customer_fault"] = bool(order["customer_fault"])
+    booked = datetime.fromisoformat(order["booked_at"])
+    order["minutes_since_booked"] = round((now - booked).total_seconds() / 60, 1)
+    window_end = datetime.fromisoformat(order["pickup_window_end"])
+    order["minutes_past_pickup_window_end"] = round((now - window_end).total_seconds() / 60, 1)
+    if order["cancellation_requested_at"]:
+        requested = datetime.fromisoformat(order["cancellation_requested_at"])
+        order["minutes_between_booking_and_cancellation_request"] = round(
+            (requested - booked).total_seconds() / 60, 1
+        )
     order["dataset_reference_time"] = now.isoformat()
+    order["currency"] = CURRENCY
     return {"order": order}
 
 
@@ -54,7 +64,13 @@ def list_orders(session: SessionContext, account_id: str | None = None, status: 
         params.append(status)
     rows = conn.execute(query, params).fetchall()
     conn.close()
-    return {"orders": [dict(r) for r in rows]}
+    orders = []
+    for r in rows:
+        o = dict(r)
+        o["carrier_fault"] = bool(o["carrier_fault"])
+        o["customer_fault"] = bool(o["customer_fault"])
+        orders.append(o)
+    return {"orders": orders, "dataset_reference_time": DATASET_SNAPSHOT.isoformat(), "currency": CURRENCY}
 
 
 def get_ticket(session: SessionContext, ticket_id: str) -> dict:
@@ -67,7 +83,7 @@ def get_ticket(session: SessionContext, ticket_id: str) -> dict:
     if session.persona == "customer" and ticket["account_id"] != session.account_id:
         return {"error": "access_denied"}
     created = datetime.fromisoformat(ticket["created_at"])
-    ticket["hours_since_created"] = round((DATASET_SNAPSHOT - created).total_seconds() / 3600, 2)
+    ticket["minutes_since_created"] = round((DATASET_SNAPSHOT - created).total_seconds() / 60, 1)
     ticket["dataset_reference_time"] = DATASET_SNAPSHOT.isoformat()
     return {"ticket": ticket}
 
@@ -76,8 +92,6 @@ def list_tickets(
     session: SessionContext,
     account_id: str | None = None,
     status: str | None = None,
-    category: str | None = None,
-    severity: str | None = None,
 ) -> dict:
     scope = _resolve_account_scope(session, account_id)
     conn = get_conn()
@@ -89,15 +103,9 @@ def list_tickets(
     if status:
         query += " AND status = ?"
         params.append(status)
-    if category:
-        query += " AND category = ?"
-        params.append(category)
-    if severity:
-        query += " AND severity = ?"
-        params.append(severity)
     rows = conn.execute(query, params).fetchall()
     conn.close()
-    return {"tickets": [dict(r) for r in rows]}
+    return {"tickets": [dict(r) for r in rows], "dataset_reference_time": DATASET_SNAPSHOT.isoformat()}
 
 
 def get_account(session: SessionContext, account_id: str | None = None) -> dict:
